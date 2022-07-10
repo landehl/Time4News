@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "126189167206",
+    "firebase_url": "https://timefornews-b1ce8-default-rtdb.firebaseio.com",
+    "project_id": "timefornews-b1ce8",
+    "storage_bucket": "timefornews-b1ce8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:126189167206:android:5f330357b355622b6ac3a7",
+        "android_client_info": {
+          "package_name": "it.unimib.gruppoall.time4news"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "126189167206-hsibsqhfp5iblsavooqr95o86aamib68.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDCULQej9YK1iLrR62WtIJzS_ebW-mNSf0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "126189167206-hsibsqhfp5iblsavooqr95o86aamib68.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

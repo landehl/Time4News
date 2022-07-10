@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_feed">
+
+    <fragment
+        android:id="@+id/navigation_feed"
+        android:name="it.unimib.gruppoall.time4news.fragments.topnews.TopNewsFragment"
+        tools:layout="@layout/fragment_top_news" />
+
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="it.unimib.gruppoall.time4news.fragments.profile.ProfileFragment"
+        tools:layout="@layout/fragment_profile" />
+    <fragment
+        android:id="@+id/navigation_myNews"
+        android:name="it.unimib.gruppoall.time4news.fragments.mynews.MyNewsFragment"
+        android:label="fragment_my_news"
+        tools:layout="@layout/fragment_my_news" />
+    <fragment
+        android:id="@+id/navigation_newsCategories"
+        android:name="it.unimib.gruppoall.time4news.fragments.news_categories.NewsCategoriesFragment"
+        android:label="fragment_news_categories"
+        tools:layout="@layout/fragment_news_categories" />
+
+
+</navigation>
