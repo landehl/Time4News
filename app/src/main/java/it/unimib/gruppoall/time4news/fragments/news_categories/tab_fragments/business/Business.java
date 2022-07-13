@@ -39,41 +39,56 @@ public class Business extends Fragment {
     private NewsListAdapter mNewsListAdapter;
     private RecyclerView mRecyclerView;
     private SwipeRefreshLayout mSwipeRefreshLayout;
-
     private boolean feedInitializedSentinel;
+    private LinearLayoutManager mLinearLayoutManager;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mNewsViewModel = new ViewModelProvider(requireActivity()).get(NewsViewModel.class);
+
+    }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_business, container, false);
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+        View view =inflater.inflate(R.layout.fragment_top_news, container, false);
 
         feedInitializedSentinel = false;
-
-        mNewsViewModel = new ViewModelProvider(requireActivity()).get(NewsViewModel.class);
-        mSwipeRefreshLayout = view.findViewById(R.id.business_swipe_refresh);
+        mSwipeRefreshLayout = view.findViewById(R.id.feed_swipe_refresh);
         mSwipeRefreshLayout.setRefreshing(true);
-
-        mRecyclerView = view.findViewById(R.id.business_news_recyclerview);
+        mLinearLayoutManager = new LinearLayoutManager(getActivity());
+        mRecyclerView = view.findViewById(R.id.feed_recycler_view);
         // Recupero dati database
         user = null;
         // Collego un listener all'utente
-        FbDatabase.getUserReference().addValueEventListener(postListenerUserData);
+        FbDatabase.getUserReference().addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                user = snapshot.getValue(User.class);
+                if (!FbDatabase.getUserDeleting()) {
+                    if (!feedInitializedSentinel && user != null) {
+                        mSwipeRefreshLayout.setRefreshing(true);
+                        initializeFeed();
+                        feedInitializedSentinel = true;
+                    }
+                }
+            }
 
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        return view;
     }
 
-    public void initializeFeed(){
+    public void initializeFeed() {
         mNewsList = new ArrayList<>();
-        mNewsViewModel.refreshNews();
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setLayoutManager(mLinearLayoutManager);
         mRecyclerView.setHasFixedSize(true);
         mNewsListAdapter = new NewsListAdapter(getActivity(), mNewsList, user, (byte) 1);
         mRecyclerView.setAdapter(mNewsListAdapter);
-
         final Observer<NewsResponse> observer = new Observer<NewsResponse>() {
             @Override
             public void onChanged(NewsResponse newsResponse) {
@@ -84,8 +99,6 @@ public class Business extends Fragment {
                 if (newsResponse.getArticles() != null) {
                     mNewsList.clear();
                     mNewsList.addAll(newsResponse.getArticles());
-
-
                     mNewsListAdapter.notifyDataSetChanged();
                     mSwipeRefreshLayout.setRefreshing(false);
                 }
@@ -104,29 +117,10 @@ public class Business extends Fragment {
     }
 
 
-    private ValueEventListener postListenerUserData = new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            user = dataSnapshot.getValue(User.class);
-            if(!FbDatabase.getUserDeleting()) {
-                if (!feedInitializedSentinel && user != null) {
-                    mSwipeRefreshLayout.setRefreshing(true);
-                    initializeFeed();
-                    feedInitializedSentinel = true;
-                }
-            }
-        }
-
-        @Override
-        public void onCancelled(@NonNull DatabaseError databaseError) {
-           // throw databaseError.toException();
-        }
-    };
 
     private void showError(String errorMessage) {
         Snackbar.make(requireActivity().findViewById(android.R.id.content),
                 errorMessage, Snackbar.LENGTH_LONG).show();
-
 
 
     }

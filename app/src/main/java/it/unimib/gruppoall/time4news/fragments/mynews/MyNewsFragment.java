@@ -36,72 +36,6 @@ public class MyNewsFragment extends Fragment {
 
     // Firebase
     private User user;
-    private ValueEventListener postListenerFirstUserData = new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            user = dataSnapshot.getValue(User.class);
-
-
-            locallySavedNews.clear();
-            Gson gson = new Gson();
-            for (String jsonPON : user.getNews()) {
-                locallySavedNews.add(gson.fromJson(jsonPON, News.class));
-            }
-
-            adapter = new NewsListAdapter(getActivity(), locallySavedNews, user, (byte) 3);
-
-            // Controllo la presenza o meno di informazioni per mostrare un messaggio di stato
-            if (locallySavedNews.isEmpty()) {
-                mRecyclerView.setVisibility(View.GONE);
-                mEmptyTV.setVisibility(View.VISIBLE);
-            } else {
-                mRecyclerView.setVisibility(View.VISIBLE);
-                mEmptyTV.setVisibility(View.GONE);
-            }
-
-            // Recupero il recyclerview dal layout xml e imposto l'adapter
-            LinearLayoutManager manager = new LinearLayoutManager(getActivity());
-            mRecyclerView.setLayoutManager(manager);
-            mRecyclerView.setHasFixedSize(true);
-            mRecyclerView.setAdapter(adapter);
-        }
-
-        @Override
-        public void onCancelled(@NonNull DatabaseError databaseError) {
-            throw databaseError.toException();
-        }
-    };
-    private ValueEventListener postListenerUserData = new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            user = dataSnapshot.getValue(User.class);
-
-            if(user!=null) {
-
-                locallySavedNews.clear();
-                Gson gson = new Gson();
-                for (String jsonPON : user.getNews()) {
-                    locallySavedNews.add(gson.fromJson(jsonPON, News.class));
-                }
-
-                // Controllo la presenza o meno di informazioni per mostrare un messaggio di stato
-                if (locallySavedNews.isEmpty()) {
-                    mRecyclerView.setVisibility(View.GONE);
-                    mEmptyTV.setVisibility(View.VISIBLE);
-                } else {
-                    mRecyclerView.setVisibility(View.VISIBLE);
-                    mEmptyTV.setVisibility(View.GONE);
-                }
-
-                adapter.notifyDataSetChanged();
-            }
-        }
-
-        @Override
-        public void onCancelled(@NonNull DatabaseError databaseError) {
-         //   throw databaseError.toException();
-        }
-    };
 
     public MyNewsFragment() {
     }
@@ -115,22 +49,86 @@ public class MyNewsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_my_news, container, false);
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
+        View view = inflater.inflate(R.layout.fragment_my_news, container, false);
         // Inizializzo lista news mantenute salvate localmente
         locallySavedNews = new ArrayList<>();
 
         // Binding elementi visuali
-        mRecyclerView = requireView().findViewById(R.id.tabsavednews_recycler_view);
-        mEmptyTV = requireView().findViewById(R.id.tabsavednews_empty_view);
+        mRecyclerView = view.findViewById(R.id.tabsavednews_recycler_view);
+        mEmptyTV = view.findViewById(R.id.tabsavednews_empty_view);
 
         // Recupero dati database
-        FbDatabase.getUserReference().addListenerForSingleValueEvent(postListenerFirstUserData);
-        FbDatabase.getUserReference().addValueEventListener(postListenerUserData);
+        FbDatabase.getUserReference().addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                user = snapshot.getValue(User.class);
+
+
+                locallySavedNews.clear();
+                Gson gson = new Gson();
+                for (String jsonPON : user.getNews()) {
+                    locallySavedNews.add(gson.fromJson(jsonPON, News.class));
+                }
+
+                adapter = new NewsListAdapter(getActivity(), locallySavedNews, user, (byte) 3);
+
+                // Controllo la presenza o meno di informazioni per mostrare un messaggio di stato
+                if (locallySavedNews.isEmpty()) {
+                    mRecyclerView.setVisibility(View.GONE);
+                    mEmptyTV.setVisibility(View.VISIBLE);
+                } else {
+                    mRecyclerView.setVisibility(View.VISIBLE);
+                    mEmptyTV.setVisibility(View.GONE);
+                }
+
+                // Recupero il recyclerview dal layout xml e imposto l'adapter
+                LinearLayoutManager manager = new LinearLayoutManager(getActivity());
+                mRecyclerView.setLayoutManager(manager);
+                mRecyclerView.setHasFixedSize(true);
+                mRecyclerView.setAdapter(adapter);
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        FbDatabase.getUserReference().addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                user = snapshot.getValue(User.class);
+
+                if(user!=null) {
+
+                    locallySavedNews.clear();
+                    Gson gson = new Gson();
+                    for (String jsonPON : user.getNews()) {
+                        locallySavedNews.add(gson.fromJson(jsonPON, News.class));
+                    }
+
+                    // Controllo la presenza o meno di informazioni per mostrare un messaggio di stato
+                    if (locallySavedNews.isEmpty()) {
+                        mRecyclerView.setVisibility(View.GONE);
+                        mEmptyTV.setVisibility(View.VISIBLE);
+                    } else {
+                        mRecyclerView.setVisibility(View.VISIBLE);
+                        mEmptyTV.setVisibility(View.GONE);
+                    }
+
+                    adapter.notifyDataSetChanged();
+                }
+            }
+
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+        return view;
     }
+
+
 }

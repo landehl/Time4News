@@ -43,17 +43,18 @@ public class TopNewsFragment extends Fragment {
     private LinearLayoutManager mLinearLayoutManager;
     private boolean feedInitializedSentinel;
 
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_top_news, container, false);
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mNewsViewModel = new ViewModelProvider(requireActivity()).get(NewsViewModel.class);
+
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_top_news, container, false);
 
         feedInitializedSentinel = false;
-        mNewsViewModel = new ViewModelProvider(requireActivity()).get(NewsViewModel.class);
         mSwipeRefreshLayout = view.findViewById(R.id.feed_swipe_refresh);
         mSwipeRefreshLayout.setRefreshing(true);
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
@@ -61,9 +62,26 @@ public class TopNewsFragment extends Fragment {
         // Recupero dati database
         user = null;
         // Collego un listener all'utente
-        FbDatabase.getUserReference().addValueEventListener(postListenerUserData);
+        FbDatabase.getUserReference().addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                user = snapshot.getValue(User.class);
+                if (!FbDatabase.getUserDeleting()) {
+                    if (!feedInitializedSentinel && user != null) {
+                        mSwipeRefreshLayout.setRefreshing(true);
+                        initializeFeed();
+                        feedInitializedSentinel = true;
+                    }
+                }
+            }
 
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
 
+            }
+        });
+
+        return view;
     }
 
     public void initializeFeed() {
@@ -100,25 +118,6 @@ public class TopNewsFragment extends Fragment {
         });
     }
 
-
-    private ValueEventListener postListenerUserData = new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            user = dataSnapshot.getValue(User.class);
-            if (!FbDatabase.getUserDeleting()) {
-                if (!feedInitializedSentinel && user != null) {
-                    mSwipeRefreshLayout.setRefreshing(true);
-                    initializeFeed();
-                    feedInitializedSentinel = true;
-                }
-            }
-        }
-
-        @Override
-        public void onCancelled(@NonNull DatabaseError databaseError) {
-            //  throw databaseError.toException();
-        }
-    };
 
     private void showError(String errorMessage) {
         Snackbar.make(requireActivity().findViewById(android.R.id.content),

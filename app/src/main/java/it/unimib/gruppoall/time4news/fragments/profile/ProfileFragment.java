@@ -59,15 +59,7 @@ public class ProfileFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-
-
-        return inflater.inflate(R.layout.fragment_profile, container, false);
-    }
-
-
-    @Override
-    public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+        View view = inflater.inflate(R.layout.fragment_profile, container, false);
         CardView logout = view.findViewById(R.id.cv_logout);
         CardView deleteaccount = view.findViewById(R.id.cv_deleteaccount);
         usernameET = view.findViewById(R.id.Username);
@@ -114,9 +106,27 @@ public class ProfileFragment extends Fragment {
         Log.d(TAG, "Dentro getUserOnDb()");
 
         // collego un listener all'user su Db
-        FbDatabase.getUserReference().addListenerForSingleValueEvent(postListener);
+        FbDatabase.getUserReference().addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!userDeleted) {
+                    theUser = snapshot.getValue(User.class);
 
+                    // quando leggo l'user da db, chiamo il motodo che inizializza l'activity
+                    setUp(requireActivity().findViewById(android.R.id.content).getRootView());
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.w(TAG, "loadPost:onCancelled", error.toException());
+            }
+        });
+
+
+        return view;
     }
+
 
     private void deleteAccount() {
         userDeleted = true;
@@ -139,25 +149,6 @@ public class ProfileFragment extends Fragment {
         FbDatabase.getUserReference().removeValue();
 
     }
-
-    ValueEventListener postListener = new ValueEventListener() {
-        @Override
-        public void onDataChange(@NotNull DataSnapshot dataSnapshot) {
-            if (!userDeleted) {
-                theUser = dataSnapshot.getValue(User.class);
-
-                // quando leggo l'user da db, chiamo il motodo che inizializza l'activity
-                setUp(requireActivity().findViewById(android.R.id.content).getRootView());
-            }
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-            // Getting Post failed, log a message
-            Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-        }
-    };
-
 
     private void setUp(View view) {
 
@@ -244,15 +235,9 @@ public class ProfileFragment extends Fragment {
                 .build();
 
         FbDatabase.getUserAuth().updateProfile(profileUpdates);
-
         // set the name in the database
         FbDatabase.getUserReference().child("username").setValue(newUSername.toString());
 
     }
 
-    @Override
-    public void onCreateOptionsMenu(@NotNull Menu menu, @NotNull MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        menu.clear();
-    }
 }

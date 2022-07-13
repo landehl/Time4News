@@ -84,7 +84,6 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsMo
             // Configurazione link
             itemView.setOnClickListener(view -> {
                 CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
-                builder.setToolbarColor(view.getResources().getColor(R.color.colorPrimary));
                 builder.setShowTitle(true);
                 CustomTabsIntent customTabsIntent = builder.build();
                 customTabsIntent.launchUrl(view.getContext(), Uri.parse(pieceOfNews.getUrl()));
@@ -109,12 +108,13 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsMo
             // Titolo
             newsTitle.setText(pieceOfNews.getTitle());
 
-            // Provider della notizia
+            // Source della notizia
             newsSource.setText(pieceOfNews.getNewsSource().getName());
 
             // Descrizione
-            String plainDesc = Html.fromHtml(pieceOfNews.getDescription().replaceAll("<img.+/(img)*>", "")).toString();
-            newsDescription.setText(plainDesc);
+          //  String plainDesc = Html.fromHtml(pieceOfNews.getDescription().replaceAll("<img.+/(img)*>", "")).toString();
+           // newsDescription.setText(plainDesc);
+            newsDescription.setText(pieceOfNews.getDescription());
 
             // Data di pubblicazione
             String osDateTime = pieceOfNews.getPublishedAt();
